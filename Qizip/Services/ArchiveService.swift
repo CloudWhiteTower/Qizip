@@ -3,6 +3,7 @@ import Foundation
 enum ArchiveServiceError: LocalizedError, Equatable {
     case missingSevenZip(String = SevenZipLocator.missingMessage)
     case processFailed(exitCode: Int32, detail: String)
+    case unsafeCompressionOutput(String)
 
     var errorDescription: String? {
         switch self {
@@ -11,6 +12,8 @@ enum ArchiveServiceError: LocalizedError, Equatable {
         case .processFailed(let exitCode, let detail):
             let suffix = detail.isEmpty ? "" : "\n\(detail)"
             return "7zz 退出码为 \(exitCode)。\(suffix)"
+        case .unsafeCompressionOutput(let message):
+            return message
         }
     }
 }
@@ -43,15 +46,18 @@ struct ArchiveService {
     private let locator: SevenZipLocator
     private let runner: SevenZipRunner
     private let parser: ArchiveListParser
+    private let fileManager: FileManager
 
     init(
         locator: SevenZipLocator = SevenZipLocator(),
         runner: SevenZipRunner = SevenZipRunner(),
-        parser: ArchiveListParser = ArchiveListParser()
+        parser: ArchiveListParser = ArchiveListParser(),
+        fileManager: FileManager = .default
     ) {
         self.locator = locator
         self.runner = runner
         self.parser = parser
+        self.fileManager = fileManager
     }
 
     func sevenZipStatus() -> SevenZipStatus {
@@ -93,7 +99,7 @@ struct ArchiveService {
         try await runArchiveOperation(
             archiveURL: archiveURL,
             additionalScopedURLs: [destinationURL],
-            arguments: ["x", archiveURL.path, "-o\(destinationURL.path)"]
+            arguments: ["x", "-y", "-aoa", archiveURL.path, "-o\(destinationURL.path)"]
         )
     }
 
@@ -120,9 +126,12 @@ struct ArchiveService {
             activeScopedURLs.forEach { $0.stopAccessingSecurityScopedResource() }
         }
 
+        try validateCompressionOutput(options)
+        try removeExistingArchiveIfNeeded(at: options.outputURL)
+
         let processResult = try await runner.run(
             executableURL: executableURL,
-            arguments: ["a", options.format.sevenZipTypeArgument, "-mx=\(options.level)", options.outputURL.path] + options.inputURLs.map(\.path)
+            arguments: ["a", "-y", options.format.sevenZipTypeArgument, "-mx=\(options.level)", options.outputURL.path] + options.inputURLs.map(\.path)
         )
 
         try validate(processResult)
@@ -166,6 +175,63 @@ struct ArchiveService {
         guard processResult.exitCode == 0 else {
             let detail = processResult.stderr.isEmpty ? processResult.stdout : processResult.stderr
             throw ArchiveServiceError.processFailed(exitCode: processResult.exitCode, detail: detail)
+        }
+    }
+
+    private func validateCompressionOutput(_ options: CompressionOptions) throws {
+        let outputURL = normalizedFileURL(options.outputURL)
+        var isDirectory: ObjCBool = false
+        if fileManager.fileExists(atPath: outputURL.path, isDirectory: &isDirectory), isDirectory.boolValue {
+            throw ArchiveServiceError.unsafeCompressionOutput("输出位置是文件夹，无法保存为压缩包：\(outputURL.path)")
+        }
+
+        for inputURL in options.inputURLs {
+            let normalizedInputURL = normalizedFileURL(inputURL)
+
+            if outputURL.path == normalizedInputURL.path {
+                throw ArchiveServiceError.unsafeCompressionOutput("输出压缩包不能覆盖正在压缩的源文件：\(outputURL.path)")
+            }
+
+            var inputIsDirectory: ObjCBool = false
+            guard fileManager.fileExists(atPath: normalizedInputURL.path, isDirectory: &inputIsDirectory) else {
+                continue
+            }
+
+            if inputIsDirectory.boolValue, outputURL.isDescendant(of: normalizedInputURL) {
+                throw ArchiveServiceError.unsafeCompressionOutput("输出压缩包不能保存在正在压缩的文件夹内部。请选择源文件夹外的位置：\(outputURL.path)")
+            }
+        }
+    }
+
+    private func removeExistingArchiveIfNeeded(at outputURL: URL) throws {
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: outputURL.path, isDirectory: &isDirectory) else {
+            return
+        }
+
+        guard !isDirectory.boolValue else {
+            throw ArchiveServiceError.unsafeCompressionOutput("输出位置是文件夹，无法保存为压缩包：\(outputURL.path)")
+        }
+
+        try fileManager.removeItem(at: outputURL)
+    }
+
+    private func normalizedFileURL(_ url: URL) -> URL {
+        url.standardizedFileURL.resolvingSymlinksInPath()
+    }
+}
+
+private extension URL {
+    func isDescendant(of parentURL: URL) -> Bool {
+        let childComponents = standardizedFileURL.pathComponents
+        let parentComponents = parentURL.standardizedFileURL.pathComponents
+
+        guard childComponents.count > parentComponents.count else {
+            return false
+        }
+
+        return zip(parentComponents, childComponents).allSatisfy { parent, child in
+            parent == child
         }
     }
 }

@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-04)
 
 **Core value:** Qizip must make archive open, inspect, extract, and compress workflows feel reliable and native on macOS while preserving 7-Zip's format capability.
-**Current focus:** v0.2 Milestone 1 完成；下一步是 Milestone 2 文件关联与启动路由
+**Current focus:** v0.2 压缩/解压安全稳定化完成；下一步是 Milestone 2 文件关联与启动路由
 
 ## Current Position
 
 Phase: 7 of 15 (v0.2 Bundled SevenZip)
 Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-05-05 — Completed v0.2 Milestone 1 by bundling official `7zz`, upgrading locator diagnostics, and verifying build product resources
+Last activity: 2026-05-05 — Stabilized v0.2 compression/extraction by preventing 7zz overwrite prompts, rejecting nested output archives, defaulting compression to zip, and adding safety regression tests
 
 Progress: [███████░░░] v0.1 complete; v0.2 Phase 7 complete, Phase 8 next
 

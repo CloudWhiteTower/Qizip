@@ -62,11 +62,11 @@ enum FileDialogs {
     }
 
     @MainActor
-    static func chooseArchiveOutput(defaultName: String = "压缩包") -> URL? {
+    static func chooseArchiveOutput(defaultName: String = "压缩包", defaultFormat: CompressionFormat = .zip) -> URL? {
         let panel = NSSavePanel()
         panel.title = "保存压缩包"
         panel.prompt = "保存"
-        panel.nameFieldStringValue = "\(defaultName).7z"
+        panel.nameFieldStringValue = "\(defaultName).\(defaultFormat.rawValue)"
         panel.allowedContentTypes = [
             UTType(filenameExtension: "7z"),
             UTType(filenameExtension: "zip")

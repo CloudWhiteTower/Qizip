@@ -47,6 +47,10 @@ export QIZIP_SEVENZIP_PATH=/Users/cloud/code/CodeRepository/xcode_programmes/Qiz
 - 信息：信息面板显示路径、文件数、总大小、解析状态。
 - 压缩 7z：`压缩文件...` 选择文件/文件夹后能保存 `.7z`。
 - 压缩 zip：输出扩展名为 `.zip` 时创建 zip 压缩包。
+- 默认压缩：保存面板默认使用 `.zip`，默认文件名来自第一个选中项。
+- 压缩安全：不要允许把输出压缩包保存到正在压缩的源文件夹内部，例如 `test2zip/test2zip.zip` 或 `test2zip/压缩包.zip`。
+- 压缩覆盖：如果用户确认保存到已有压缩包路径，应替换旧压缩包，不能把旧条目残留在新压缩包里。
+- 解压覆盖：重复解压到已有同名文件的位置时，不能等待 7zz 交互确认导致 UI 卡住。
 - 日志：所有 7zz stdout/stderr 都显示在日志区域。
 - 路径安全：中文、空格、引号路径正常工作，因为 Qizip 使用 `Process.executableURL` 和 `Process.arguments`。
 
@@ -66,4 +70,7 @@ swiftc -module-cache-path .build/ModuleCache Qizip/Services/SevenZipLocator.swif
 
 swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qizip/Models/CompressionOptions.swift Qizip/Services/ArchiveListParser.swift Qizip/Services/ArchiveService.swift Qizip/Services/SevenZipLocator.swift Qizip/Services/SevenZipRunner.swift Qizip/Services/SmartExtractionPlanner.swift Tests/V1ArchiveWorkflowHarness.swift -o .build/v1-archive-workflow-harness
 .build/v1-archive-workflow-harness
+
+swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qizip/Models/CompressionOptions.swift Qizip/Services/ArchiveListParser.swift Qizip/Services/ArchiveService.swift Qizip/Services/SevenZipLocator.swift Qizip/Services/SevenZipRunner.swift Qizip/Utilities/CompressionDefaults.swift Tests/CompressionSafetyHarness.swift -o .build/compression-safety-harness-bin
+.build/compression-safety-harness-bin
 ```

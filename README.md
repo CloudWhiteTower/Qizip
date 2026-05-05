@@ -12,6 +12,10 @@ v0.1 MVP 已完成这些能力：
 - 查看压缩包信息。
 - 将用户选择的文件或文件夹压缩为 `.7z` 或 `.zip`。
 - 在界面中显示 7zz 的 stdout/stderr 日志。
+- 默认压缩格式为 `.zip`。
+- 默认压缩包名来自第一个选中项。
+- 避免把输出压缩包保存到正在压缩的源文件夹内部。
+- 解压遇到同名文件时使用非交互覆盖，避免 7zz 等待确认导致界面看似卡住。
 
 ## v0.2 目标
 
@@ -89,6 +93,22 @@ swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qiz
 ```
 
 如果仓库根目录存在 `test2zip/`，该 harness 会优先压缩并解压这个文件夹；否则会在 `.build/` 下生成等价测试夹。
+
+压缩/解压安全回归可以用 harness 验证：
+
+```bash
+swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qizip/Models/CompressionOptions.swift Qizip/Services/ArchiveListParser.swift Qizip/Services/ArchiveService.swift Qizip/Services/SevenZipLocator.swift Qizip/Services/SevenZipRunner.swift Qizip/Utilities/CompressionDefaults.swift Tests/CompressionSafetyHarness.swift -o .build/compression-safety-harness-bin
+.build/compression-safety-harness-bin
+```
+
+该测试覆盖：
+
+- 默认格式为 `.zip`。
+- 默认压缩包名来自第一个输入文件或文件夹。
+- 拒绝将输出压缩包保存到正在压缩的源文件夹内部。
+- 已存在同名输出压缩包时替换旧文件，避免旧条目残留。
+- 重复解压到已有文件位置时不会等待交互确认。
+- 中文和空格路径正常。
 
 SevenZipLocator 的 bundle-first 行为可以用 harness 验证：
 

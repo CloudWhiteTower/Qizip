@@ -319,8 +319,8 @@ struct ContentView: View {
     }
 
     private func startCompression(inputURLs: [URL]) {
-        let defaultName = inputURLs.count == 1 ? inputURLs[0].deletingPathExtension().lastPathComponent : "压缩包"
-        guard var outputURL = FileDialogs.chooseArchiveOutput(defaultName: defaultName) else {
+        let defaultName = CompressionDefaults.archiveBaseName(for: inputURLs)
+        guard var outputURL = FileDialogs.chooseArchiveOutput(defaultName: defaultName, defaultFormat: CompressionDefaults.format) else {
             return
         }
 
