@@ -65,7 +65,7 @@ struct ContentView: View {
                 Button {
                     openArchive()
                 } label: {
-                    Label("Open Archive", systemImage: "folder")
+                    Label("打开压缩包", systemImage: "folder")
                 }
             }
         }
@@ -164,7 +164,7 @@ struct ContentView: View {
         errorMessage = nil
         isLoading = true
         parseSucceeded = false
-        currentJob = ArchiveJob(kind: .list, title: "Listing \(url.lastPathComponent)")
+        currentJob = ArchiveJob(kind: .list, title: "正在读取 \(url.lastPathComponent)")
 
         Task {
             do {
@@ -187,12 +187,12 @@ struct ContentView: View {
     }
 
     private func showAddDeferred() {
-        errorMessage = "Add will be implemented in the next milestone"
-        appendLog("Add\n\(errorMessage ?? "")")
+        errorMessage = "添加功能将在下一个版本实现"
+        appendLog("添加\n\(errorMessage ?? "")")
     }
 
     private func extractArchive() {
-        guard let selectedArchiveURL, let destinationURL = FileDialogs.chooseOutputFolder(title: "Choose Extract Destination") else {
+        guard let selectedArchiveURL, let destinationURL = FileDialogs.chooseOutputFolder(title: "选择解压目标文件夹") else {
             return
         }
 
@@ -200,12 +200,12 @@ struct ContentView: View {
             kind: .extract,
             archiveURL: selectedArchiveURL,
             destinationURL: destinationURL,
-            successMessage: "Archive extracted successfully."
+            successMessage: "压缩包已成功解压。"
         )
     }
 
     private func smartExtractArchive() {
-        guard let selectedArchiveURL, let selectedDestinationURL = FileDialogs.chooseOutputFolder(title: "Choose Smart Extract Destination") else {
+        guard let selectedArchiveURL, let selectedDestinationURL = FileDialogs.chooseOutputFolder(title: "选择智能解压目标文件夹") else {
             return
         }
 
@@ -220,8 +220,8 @@ struct ContentView: View {
             archiveURL: selectedArchiveURL,
             destinationURL: plan.destinationURL,
             successMessage: plan.createdArchiveFolder
-                ? "Smart Extract created an archive folder for \(plan.topLevelItems.count) top-level items."
-                : "Smart Extract used the selected folder because the archive has one top-level item."
+                ? "智能解压已为 \(plan.topLevelItems.count) 个顶层项目创建同名文件夹。"
+                : "压缩包只有一个顶层项目，已直接解压到所选文件夹。"
         )
     }
 
@@ -240,16 +240,16 @@ struct ContentView: View {
                 let result = try await archiveService.extractArchive(url: archiveURL, to: destinationURL)
                 appendLog("\(kind.rawValue)\n\(combinedLog(stdout: result.stdout, stderr: result.stderr))")
                 extractionPresentation = OperationPresentation(
-                    title: "\(kind.rawValue) Complete",
+                    title: "\(kind.rawValue)完成",
                     message: successMessage,
                     url: destinationURL
                 )
                 currentJob?.succeeded = true
             } catch {
                 errorMessage = error.localizedDescription
-                appendLog("\(kind.rawValue) failed\n\(error.localizedDescription)")
+                appendLog("\(kind.rawValue)失败\n\(error.localizedDescription)")
                 extractionPresentation = OperationPresentation(
-                    title: "\(kind.rawValue) Failed",
+                    title: "\(kind.rawValue)失败",
                     message: error.localizedDescription,
                     url: nil
                 )
@@ -269,16 +269,16 @@ struct ContentView: View {
 
         errorMessage = nil
         isLoading = true
-        currentJob = ArchiveJob(kind: .test, title: "Testing \(selectedArchiveURL.lastPathComponent)")
+        currentJob = ArchiveJob(kind: .test, title: "正在测试 \(selectedArchiveURL.lastPathComponent)")
 
         Task {
             do {
                 let result = try await archiveService.testArchive(url: selectedArchiveURL)
-                appendLog("Test succeeded\n\(combinedLog(stdout: result.stdout, stderr: result.stderr))")
-                errorMessage = "Test succeeded."
+                appendLog("测试通过\n\(combinedLog(stdout: result.stdout, stderr: result.stderr))")
+                errorMessage = "测试通过。"
                 currentJob?.succeeded = true
             } catch {
-                errorMessage = "Test failed: \(error.localizedDescription)"
+                errorMessage = "测试失败：\(error.localizedDescription)"
                 appendLog(errorMessage ?? error.localizedDescription)
                 currentJob?.succeeded = false
                 currentJob?.message = error.localizedDescription
@@ -311,7 +311,7 @@ struct ContentView: View {
     }
 
     private func startCompression(inputURLs: [URL]) {
-        let defaultName = inputURLs.count == 1 ? inputURLs[0].deletingPathExtension().lastPathComponent : "Archive"
+        let defaultName = inputURLs.count == 1 ? inputURLs[0].deletingPathExtension().lastPathComponent : "压缩包"
         guard var outputURL = FileDialogs.chooseArchiveOutput(defaultName: defaultName) else {
             return
         }
@@ -326,23 +326,23 @@ struct ContentView: View {
         logText = ""
         isLoading = true
         selectedArchiveURL = nil
-        currentJob = ArchiveJob(kind: .compress, title: "Compressing \(inputURLs.count) item(s)")
+        currentJob = ArchiveJob(kind: .compress, title: "正在压缩 \(inputURLs.count) 个项目")
 
         Task {
             do {
                 let result = try await archiveService.compress(options: options)
-                appendLog("Compress succeeded\n\(combinedLog(stdout: result.stdout, stderr: result.stderr))")
+                appendLog("压缩完成\n\(combinedLog(stdout: result.stdout, stderr: result.stderr))")
                 compressionPresentation = OperationPresentation(
-                    title: "Compression Complete",
-                    message: "Archive created successfully.",
+                    title: "压缩完成",
+                    message: "压缩包已成功创建。",
                     url: outputURL
                 )
                 currentJob?.succeeded = true
             } catch {
                 errorMessage = error.localizedDescription
-                appendLog("Compression failed\n\(error.localizedDescription)")
+                appendLog("压缩失败\n\(error.localizedDescription)")
                 compressionPresentation = OperationPresentation(
-                    title: "Compression Failed",
+                    title: "压缩失败",
                     message: error.localizedDescription,
                     url: nil
                 )
@@ -360,13 +360,13 @@ struct ContentView: View {
             HStack(spacing: 10) {
                 Image(systemName: "info.circle")
                     .foregroundStyle(.secondary)
-                Text("Archive Info")
+                Text("压缩包信息")
                     .font(.headline)
             }
 
             Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 10) {
                 GridRow {
-                    Text("Path")
+                    Text("路径")
                         .foregroundStyle(.secondary)
                     Text(info.archiveURL.path)
                         .font(.system(.caption, design: .monospaced))
@@ -374,29 +374,29 @@ struct ContentView: View {
                 }
 
                 GridRow {
-                    Text("Files")
+                    Text("文件数")
                         .foregroundStyle(.secondary)
                     Text("\(info.fileCount)")
                         .monospacedDigit()
                 }
 
                 GridRow {
-                    Text("Total Size")
+                    Text("总大小")
                         .foregroundStyle(.secondary)
                     Text(ByteCountFormatter.string(fromByteCount: info.totalSize, countStyle: .file))
                         .monospacedDigit()
                 }
 
                 GridRow {
-                    Text("Parse Status")
+                    Text("解析状态")
                         .foregroundStyle(.secondary)
-                    Text(info.parseSucceeded ? "Succeeded" : "Failed or incomplete")
+                    Text(info.parseSucceeded ? "成功" : "失败或不完整")
                 }
             }
 
             HStack {
                 Spacer()
-                Button("Done") {
+                Button("完成") {
                     archiveInfo = nil
                 }
                 .keyboardShortcut(.defaultAction)
@@ -409,10 +409,10 @@ struct ContentView: View {
     private func combinedLog(stdout: String, stderr: String) -> String {
         var sections: [String] = []
         if !stdout.isEmpty {
-            sections.append("stdout\n\(stdout)")
+            sections.append("标准输出\n\(stdout)")
         }
         if !stderr.isEmpty {
-            sections.append("stderr\n\(stderr)")
+            sections.append("错误输出\n\(stderr)")
         }
         return sections.joined(separator: "\n\n")
     }

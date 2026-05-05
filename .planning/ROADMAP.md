@@ -110,7 +110,7 @@ Plans:
 - [x] 05-02: Polish layout, dark mode, and edge-case manual verification.
 
 ### Phase 6: Test And Release Readiness
-**Goal**: The MVP has focused verification coverage and can be built as a direct macOS app outside the App Store.
+**Goal**: The MVP has focused verification coverage, Chinese user-facing copy, and can be built as a direct macOS app outside the App Store.
 **Depends on**: Phase 5
 **Requirements**: [PLAT-01, ENG-03, OPEN-05, EXT-04, EXT-05, EXT-06, COMP-04, COMP-05, PATH-01]
 **Success Criteria** (what must be TRUE):
@@ -118,11 +118,12 @@ Plans:
   2. Manual acceptance checklist covers all v1 workflows.
   3. Build settings and README explain local `7zz` dependency.
   4. MVP is ready for direct run from Xcode.
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
 - [x] 06-01: Add tests or test harnesses for parser and planner logic.
 - [x] 06-02: Add manual acceptance documentation and release-readiness cleanup.
+- [x] 06-03: Localize user-facing copy and docs for Chinese v1.
 
 ## Progress
 
@@ -136,4 +137,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Smart Extract | 2/2 | Complete | 2026-05-05 |
 | 4. Compression Flow | 2/2 | Complete | 2026-05-05 |
 | 5. UX And Error Hardening | 2/2 | Complete | 2026-05-05 |
-| 6. Test And Release Readiness | 2/2 | Complete | 2026-05-05 |
+| 6. Test And Release Readiness | 3/3 | Complete | 2026-05-05 |

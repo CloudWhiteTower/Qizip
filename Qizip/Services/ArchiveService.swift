@@ -10,7 +10,7 @@ enum ArchiveServiceError: LocalizedError, Equatable {
             return SevenZipLocator.missingMessage
         case .processFailed(let exitCode, let detail):
             let suffix = detail.isEmpty ? "" : "\n\(detail)"
-            return "7zz exited with code \(exitCode).\(suffix)"
+            return "7zz 退出码为 \(exitCode)。\(suffix)"
         }
     }
 }

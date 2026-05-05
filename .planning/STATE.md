@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-05-04)
 
 **Core value:** Qizip must make archive open, inspect, extract, and compress workflows feel reliable and native on macOS while preserving 7-Zip's format capability.
-**Current focus:** MVP build verification complete; runtime 7zz success-path validation pending local dependency
+**Current focus:** v1 中文版完成，等待 PR 合并/发布确认
 
 ## Current Position
 
 Phase: 6 of 6 (Test And Release Readiness)
 Plan: 2 of 2 in current phase
-Status: Complete with local dependency caveat
-Last activity: 2026-05-05 — Completed MVP implementation, error hardening, README, manual acceptance docs, build verification, and parser/planner harness
+Status: Complete
+Last activity: 2026-05-05 — Completed Chinese UI/documentation pass for v1, with build and harness verification
 
-Progress: [█████████░] 95%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: N/A (single assisted session)
 - Total execution time: N/A
 
@@ -32,11 +32,11 @@ Progress: [█████████░] 95%
 | Phase 3 | 2 | session | N/A |
 | Phase 4 | 2 | session | N/A |
 | Phase 5 | 2 | session | N/A |
-| Phase 6 | 2 | session | N/A |
+| Phase 6 | 3 | session | N/A |
 
 **Recent Trend:**
-- Last 5 plans: 05-01, 05-02, 06-01, 06-02
-- Trend: MVP implementation is build-verified; remaining risk is runtime validation after installing local `7zz`
+- Last 5 plans: 05-02, 06-01, 06-02, 06-03
+- Trend: v1 MVP is implemented, Chinese-localized, build-verified, and ready for PR review
 
 *Updated after each plan completion*
 
@@ -75,5 +75,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-05
-Stopped at: MVP build-verified; install `7zz` to run final manual acceptance checklist
+Stopped at: v1 Chinese MVP complete on branch `codex/qizip-mvp`
 Resume file: None

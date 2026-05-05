@@ -26,23 +26,23 @@ struct ArchiveBrowserView: View {
             Divider()
 
             Table(sortedEntries, sortOrder: $sortOrder) {
-                TableColumn("Name", value: \.name)
+                TableColumn("名称", value: \.name)
 
-                TableColumn("Path", value: \.path)
+                TableColumn("路径", value: \.path)
 
-                TableColumn("Size") { entry in
+                TableColumn("大小") { entry in
                     Text(formatBytes(entry.size))
                         .monospacedDigit()
                         .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 .width(min: 80, ideal: 110)
 
-                TableColumn("Modified") { entry in
+                TableColumn("修改时间") { entry in
                     Text(entry.modified ?? "")
                 }
                 .width(min: 150, ideal: 190)
 
-                TableColumn("Is Directory") { entry in
+                TableColumn("文件夹") { entry in
                     Image(systemName: entry.isDirectory ? "checkmark" : "minus")
                         .foregroundStyle(entry.isDirectory ? .secondary : .tertiary)
                 }
@@ -51,9 +51,9 @@ struct ArchiveBrowserView: View {
             .overlay {
                 if entries.isEmpty {
                     ContentUnavailableView(
-                        isLoading ? "Reading Archive" : "No Entries",
+                        isLoading ? "正在读取压缩包" : "没有条目",
                         systemImage: isLoading ? "hourglass" : "archivebox",
-                        description: Text(isLoading ? "Running 7zz l -slt." : "Open or drop an archive to inspect its entries.")
+                        description: Text(isLoading ? "正在运行 7zz l -slt。" : "打开或拖入压缩包以查看内容。")
                     )
                 }
             }
@@ -101,40 +101,40 @@ struct ArchiveBrowserView: View {
             Button {
                 onAdd()
             } label: {
-                Label("Add", systemImage: "plus")
+                Label("添加", systemImage: "plus")
             }
-            .help("Add")
+            .help("添加")
 
             Button {
                 onExtract()
             } label: {
-                Label("Extract", systemImage: "arrow.down.doc")
+                Label("解压", systemImage: "arrow.down.doc")
             }
             .disabled(isLoading)
-            .help("Extract")
+            .help("解压")
 
             Button {
                 onSmartExtract()
             } label: {
-                Label("Smart Extract", systemImage: "wand.and.stars")
+                Label("智能解压", systemImage: "wand.and.stars")
             }
             .disabled(isLoading)
-            .help("Smart Extract")
+            .help("智能解压")
 
             Button {
                 onTest()
             } label: {
-                Label("Test", systemImage: "checkmark.seal")
+                Label("测试", systemImage: "checkmark.seal")
             }
             .disabled(isLoading)
-            .help("Test")
+            .help("测试")
 
             Button {
                 onInfo()
             } label: {
-                Label("Info", systemImage: "info.circle")
+                Label("信息", systemImage: "info.circle")
             }
-            .help("Info")
+            .help("信息")
         }
         .labelStyle(.titleAndIcon)
     }
@@ -152,5 +152,8 @@ struct ArchiveBrowserView: View {
         return lowercased.contains("failed")
             || lowercased.contains("not found")
             || lowercased.contains("exited with code")
+            || lowercased.contains("失败")
+            || lowercased.contains("未找到")
+            || lowercased.contains("退出码")
     }
 }

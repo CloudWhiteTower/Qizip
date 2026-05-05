@@ -67,7 +67,7 @@ struct SmartExtractionPlanner {
     }
 
     private func availableFolderURL(named baseName: String, in parentURL: URL) -> URL {
-        let cleanedName = baseName.isEmpty ? "Archive" : baseName
+        let cleanedName = baseName.isEmpty ? "压缩包" : baseName
         var candidateURL = parentURL.appendingPathComponent(cleanedName, isDirectory: true)
 
         if !fileManager.fileExists(atPath: candidateURL.path) {

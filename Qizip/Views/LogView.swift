@@ -5,11 +5,11 @@ struct LogView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Log")
+            Text("日志")
                 .font(.headline)
 
             ScrollView {
-                Text(text.isEmpty ? "(empty)" : text)
+                Text(text.isEmpty ? "暂无日志" : text)
                     .font(.system(.caption, design: .monospaced))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -1,7 +1,7 @@
 import Foundation
 
 struct SevenZipLocator {
-    static let missingMessage = "7zz was not found. Please install it with: brew install sevenzip"
+    static let missingMessage = "未找到 7zz。请使用 brew install sevenzip 安装。"
 
     let fileManager: FileManager
 
@@ -33,7 +33,7 @@ struct SevenZipLocator {
 
     func status() -> SevenZipStatus {
         if let url = locate() {
-            return SevenZipStatus(executableURL: url, message: "Found at \(url.path)")
+            return SevenZipStatus(executableURL: url, message: "已找到：\(url.path)")
         }
 
         return SevenZipStatus(executableURL: nil, message: Self.missingMessage)

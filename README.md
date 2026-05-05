@@ -1,74 +1,71 @@
 # Qizip
 
-Qizip is a macOS-native SwiftUI archive manager inspired by NanaZip's core user experience. It is not a Windows NanaZip port. The v1 MVP focuses on opening archives, browsing their contents, extracting safely, testing integrity, and compressing selected files or folders.
+Qizip 是一个 macOS 原生 SwiftUI 压缩包管理器，目标是复刻 NanaZip 的核心使用体验，而不是移植 NanaZip 的 Windows 代码。
 
-## Requirements
+v1 MVP 聚焦这些能力：
 
-- macOS with Xcode
-- Local 7-Zip command line tool `7zz`
+- 打开或拖入压缩包。
+- 以文件管理器风格浏览压缩包内容。
+- 解压到用户选择的文件夹。
+- 智能解压，避免多个顶层文件直接散落到目标目录。
+- 测试压缩包完整性。
+- 查看压缩包信息。
+- 将用户选择的文件或文件夹压缩为 `.7z` 或 `.zip`。
+- 在界面中显示 7zz 的 stdout/stderr 日志。
 
-Qizip looks for `7zz` in this order:
+## 运行依赖
+
+Qizip v1 依赖本机 7-Zip 命令行工具 `7zz`。
+
+查找顺序：
 
 1. `/opt/homebrew/bin/7zz`
 2. `/usr/local/bin/7zz`
 
-If neither path exists, the app shows:
+如果两个路径都不存在，App 会显示：
 
 ```text
-7zz was not found. Please install it with: brew install sevenzip
+未找到 7zz。请使用 brew install sevenzip 安装。
 ```
 
-Install 7-Zip with:
+推荐安装方式：
 
 ```bash
 brew install sevenzip
 ```
 
-For local development, you can also point Qizip at a project-local `7zz`:
+本地开发时，也可以指定项目内下载的 `7zz`：
 
 ```bash
 export QIZIP_SEVENZIP_PATH=/Users/cloud/code/CodeRepository/xcode_programmes/Qizip/Qizip/.build/tools/7zip/7zz
 ```
 
-Debug builds also check `.build/tools/7zip/7zz` relative to the current working directory, which is useful for command-line testing from the repository root.
+Debug 构建还会尝试读取仓库根目录下的 `.build/tools/7zip/7zz`，便于本地命令行测试。
 
-## Build
+## 构建
 
-Open `Qizip.xcodeproj` in Xcode and run the `Qizip` scheme on macOS.
+用 Xcode 打开 `Qizip.xcodeproj`，选择 `Qizip` scheme，在 macOS 上运行。
 
-For command-line verification inside this repo:
+命令行构建：
 
 ```bash
 xcodebuild -project Qizip.xcodeproj -scheme Qizip -destination 'platform=macOS' -derivedDataPath .build/DerivedData CODE_SIGNING_ALLOWED=NO build
 ```
 
-## Test Harness
+## 轻量测试
 
-Parser and Smart Extract planner logic can be checked with:
+Parser 和 Smart Extract 规划器可以用 harness 验证：
 
 ```bash
 swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qizip/Services/ArchiveListParser.swift Qizip/Services/SmartExtractionPlanner.swift Tests/ParserPlannerHarness.swift -o .build/parser-planner-harness
 .build/parser-planner-harness
 ```
 
-## v1 Scope
+## v1 不做的范围
 
-Included:
-
-- Open or drop archives.
-- Browse archive entries in a SwiftUI table.
-- Extract to a chosen folder.
-- Smart Extract to avoid dumping many top-level items into one folder.
-- Test archive integrity.
-- Show archive info.
-- Compress selected files or folders to `.7z` or `.zip`.
-- Show stdout and stderr in the app log.
-
-Deferred:
-
-- Finder right-click menu.
-- Finder Sync.
-- App Store distribution.
-- Embedded 7-Zip core.
-- Full Disk Access.
-- Persistent security-scoped bookmarks.
+- Finder 右键菜单。
+- Finder Sync。
+- App Store 发布。
+- 内嵌 7-Zip core。
+- Full Disk Access。
+- 持久化 security-scoped bookmarks。

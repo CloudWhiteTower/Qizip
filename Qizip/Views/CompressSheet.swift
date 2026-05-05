@@ -23,7 +23,7 @@ struct CompressSheet: View {
 
             if let outputURL {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Archive")
+                    Text("压缩包")
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
@@ -40,11 +40,11 @@ struct CompressSheet: View {
                     Button {
                         onReveal?()
                     } label: {
-                        Label("Reveal in Finder", systemImage: "finder")
+                        Label("在 Finder 中显示", systemImage: "finder")
                     }
                 }
 
-                Button("Done") {
+                Button("完成") {
                     onDismiss()
                 }
                 .keyboardShortcut(.defaultAction)

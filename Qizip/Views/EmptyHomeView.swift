@@ -16,7 +16,7 @@ struct EmptyHomeView: View {
                     .font(.system(size: 44))
                     .foregroundStyle(.secondary)
 
-                Text("Drop an archive to open, or drop files to compress.")
+                Text("拖入压缩包即可打开，拖入文件即可压缩。")
                     .font(.title3)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
@@ -44,7 +44,7 @@ struct EmptyHomeView: View {
                 Button {
                     onOpenArchive()
                 } label: {
-                    Label("Open Archive", systemImage: "folder")
+                    Label("打开压缩包", systemImage: "folder")
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(isWorking)
@@ -52,7 +52,7 @@ struct EmptyHomeView: View {
                 Button {
                     onCompressFiles()
                 } label: {
-                    Label("Compress Files...", systemImage: "plus.rectangle.on.folder")
+                    Label("压缩文件...", systemImage: "plus.rectangle.on.folder")
                 }
                 .disabled(isWorking)
             }

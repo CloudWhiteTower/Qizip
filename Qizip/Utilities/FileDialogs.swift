@@ -17,8 +17,8 @@ enum FileDialogs {
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
-        panel.title = "Open Archive"
-        panel.prompt = "Open"
+        panel.title = "打开压缩包"
+        panel.prompt = "打开"
         panel.allowedContentTypes = supportedArchiveExtensions.compactMap { UTType(filenameExtension: $0) }
 
         guard panel.runModal() == .OK else {
@@ -29,14 +29,14 @@ enum FileDialogs {
     }
 
     @MainActor
-    static func chooseOutputFolder(title: String = "Choose Output Folder") -> URL? {
+    static func chooseOutputFolder(title: String = "选择输出文件夹") -> URL? {
         let panel = NSOpenPanel()
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
         panel.canCreateDirectories = true
         panel.title = title
-        panel.prompt = "Choose"
+        panel.prompt = "选择"
 
         guard panel.runModal() == .OK else {
             return nil
@@ -51,8 +51,8 @@ enum FileDialogs {
         panel.allowsMultipleSelection = true
         panel.canChooseDirectories = true
         panel.canChooseFiles = true
-        panel.title = "Choose Files To Compress"
-        panel.prompt = "Choose"
+        panel.title = "选择要压缩的文件"
+        panel.prompt = "选择"
 
         guard panel.runModal() == .OK else {
             return []
@@ -62,10 +62,10 @@ enum FileDialogs {
     }
 
     @MainActor
-    static func chooseArchiveOutput(defaultName: String = "Archive") -> URL? {
+    static func chooseArchiveOutput(defaultName: String = "压缩包") -> URL? {
         let panel = NSSavePanel()
-        panel.title = "Save Archive"
-        panel.prompt = "Save"
+        panel.title = "保存压缩包"
+        panel.prompt = "保存"
         panel.nameFieldStringValue = "\(defaultName).7z"
         panel.allowedContentTypes = [
             UTType(filenameExtension: "7z"),

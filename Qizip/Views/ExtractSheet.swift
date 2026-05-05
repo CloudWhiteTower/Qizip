@@ -23,7 +23,7 @@ struct ExtractSheet: View {
 
             if let destinationURL {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Destination")
+                    Text("目标位置")
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
@@ -40,11 +40,11 @@ struct ExtractSheet: View {
                     Button {
                         onReveal?()
                     } label: {
-                        Label("Reveal in Finder", systemImage: "finder")
+                        Label("在 Finder 中显示", systemImage: "finder")
                     }
                 }
 
-                Button("Done") {
+                Button("完成") {
                     onDismiss()
                 }
                 .keyboardShortcut(.defaultAction)
