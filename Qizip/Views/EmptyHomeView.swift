@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct EmptyHomeView: View {
+    let sevenZipSourceText: String
     let sevenZipStatusText: String
     let isSevenZipAvailable: Bool
     let isWorking: Bool
@@ -21,10 +22,16 @@ struct EmptyHomeView: View {
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.primary)
 
-                Label(sevenZipStatusText, systemImage: isSevenZipAvailable ? "checkmark.circle" : "exclamationmark.triangle")
+                Label("7zz 来源：\(sevenZipSourceText)", systemImage: isSevenZipAvailable ? "checkmark.circle" : "exclamationmark.triangle")
                     .font(.callout)
                     .foregroundColor(isSevenZipAvailable ? .secondary : .orange)
                     .multilineTextAlignment(.center)
+
+                Text(sevenZipStatusText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .textSelection(.enabled)
 
                 if isWorking {
                     ProgressView()

@@ -2,9 +2,11 @@
 
 ## What This Is
 
-Qizip is a macOS-native SwiftUI archive manager inspired by NanaZip's user experience and powered in v1 by the official 7-Zip command-line tool `7zz`. It is not a Windows NanaZip port; it aims to bring a modern, simple archive browser to macOS with open, list, extract, smart extract, test, info, and basic compression workflows.
+Qizip is a macOS-native SwiftUI archive manager inspired by NanaZip's user experience and powered by the official 7-Zip command-line tool `7zz`. It is not a Windows NanaZip port; it aims to bring a modern, simple archive browser to macOS with open, list, extract, smart extract, test, info, and basic compression workflows.
 
 The first release is a runnable MVP for Mac: users open or drop archives, browse archive contents in a file-manager-style interface, extract safely, test archives, and compress selected files or folders into `.7z` or `.zip`.
+
+v0.2 upgrades the app from a working `7zz` GUI wrapper toward a macOS-native archive manager: double-click opens the Archive Browser, Finder actions become shortcuts, the app bundles official `7zz`, and queue/settings/bookmark architecture is introduced incrementally.
 
 ## Core Value
 
@@ -19,7 +21,7 @@ Qizip must make archive open, inspect, extract, and compress workflows feel reli
 ### Active
 
 - [ ] User can launch a macOS SwiftUI app named Qizip.
-- [ ] User can see whether `7zz` is available at supported Homebrew paths.
+- [x] User can see whether `7zz` is available at supported Homebrew paths.
 - [ ] User can open supported archive files through an open panel or drag and drop.
 - [ ] User can view archive contents in a structured table.
 - [ ] User can extract an archive to a selected destination.
@@ -29,15 +31,17 @@ Qizip must make archive open, inspect, extract, and compress workflows feel reli
 - [ ] User can select files or folders and compress them into `.7z` or `.zip`.
 - [ ] User can see all `7zz` stdout and stderr in an in-app log.
 - [ ] Chinese paths, spaces, and quoted characters work because subprocess calls use `Process.executableURL` and `Process.arguments`.
+- [ ] User can run QiZip with bundled official `7zz` without installing Homebrew sevenzip.
+- [ ] User can see the active `7zz` source: Bundled, Homebrew, System, or Not Found.
 
 ### Out of Scope
 
-- Finder right-click menu and Finder Sync — deferred until the core app workflow is stable.
+- Finder Sync — full deep Finder integration is deferred until basic Quick Actions are proven.
 - App Store release — v1 depends on local `7zz` and is a direct MVP, not a store distribution.
-- Bundling or embedding 7-Zip core — v1 calls a user-installed `7zz`.
+- Embedding 7-Zip C++ core — v0.2 bundles the official CLI executable but does not embed or rewrite the core.
 - Porting NanaZip Windows code — Qizip copies the product experience goals, not the implementation.
 - Full Disk Access and proactive folder scanning — v1 only uses user-selected files from drag/drop and panels.
-- Security-scoped bookmarks — v1 keeps structure open for future BookmarkManager work but does not persist access.
+- Full Disk Access — v0.2 should use user-selected files and security-scoped bookmarks, not broad filesystem access.
 
 ## Context
 
@@ -56,7 +60,7 @@ Important implementation decisions already made:
 
 - Keep app and target name as Qizip.
 - v1 is macOS-first.
-- v1 calls local `7zz` at `/opt/homebrew/bin/7zz`, then `/usr/local/bin/7zz`.
+- v0.2 calls bundled `7zz` first, then `/opt/homebrew/bin/7zz`, `/usr/local/bin/7zz`, `/usr/bin/7zz`, and developer/debug fallbacks.
 - Subprocess invocation must use `Process.executableURL` and `Process.arguments`, never shell-string concatenation.
 - No third-party Swift libraries in v1.
 - Start from the smallest runnable version before filling out the entire feature set.
@@ -75,7 +79,8 @@ Important implementation decisions already made:
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | App name remains Qizip | User clarified that the existing Xcode app name is the intended product name | — Pending |
-| Use local `7zz` executable for v1 | Fastest path to 7-Zip capability without embedding core or vendoring source | — Pending |
+| Use official `7zz` executable instead of 7-Zip C++ core | Fastest reliable path to broad archive support without rewriting compression algorithms | — Accepted |
+| Bundle official `7zz` for v0.2 | Makes QiZip downloadable and usable without requiring Homebrew | — Active |
 | Build minimum runnable slices | User explicitly asked to plan first and start from a minimal runnable version | — Pending |
 | Defer Finder integration | Finder Sync/right-click adds macOS integration complexity not needed for MVP validation | — Pending |
 | Keep file access user-driven | Avoids scanning protected folders and aligns with v1 permission principles | — Pending |

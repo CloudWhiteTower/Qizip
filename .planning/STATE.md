@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-05-04)
 
 **Core value:** Qizip must make archive open, inspect, extract, and compress workflows feel reliable and native on macOS while preserving 7-Zip's format capability.
-**Current focus:** v1 中文版完成，`test2zip` 运行时压缩/解压验证通过
+**Current focus:** v0.2 Milestone 1 完成；下一步是 Milestone 2 文件关联与启动路由
 
 ## Current Position
 
-Phase: 6 of 6 (Test And Release Readiness)
-Plan: 2 of 2 in current phase
+Phase: 7 of 15 (v0.2 Bundled SevenZip)
+Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-05-05 — Fixed Homebrew `7zz` runtime discovery/execution issue by disabling App Sandbox for direct-distribution v1; verified `test2zip` compression/extraction workflow
+Last activity: 2026-05-05 — Completed v0.2 Milestone 1 by bundling official `7zz`, upgrading locator diagnostics, and verifying build product resources
 
-Progress: [██████████] 100%
+Progress: [███████░░░] v0.1 complete; v0.2 Phase 7 complete, Phase 8 next
 
 ## Performance Metrics
 
@@ -48,7 +48,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - Project: App name remains Qizip.
-- Project: v1 calls local `7zz` from Homebrew paths.
+- Project: v0.2 prefers bundled official `7zz`, then falls back to Homebrew/system/developer paths.
 - Project: v1 defers Finder integration, App Store, embedded 7-Zip core, Full Disk Access, and bookmarks.
 
 ### Pending Todos
@@ -61,19 +61,20 @@ None yet.
 - Local `7zz` was not found at `/opt/homebrew/bin/7zz` or `/usr/local/bin/7zz`; runtime success-path validation requires installing SevenZip.
 - Git metadata writes previously failed in sandbox; remote and commits may need to be handled outside this session.
 - Current Xcode target lists multiple Apple platforms although product scope is macOS-first.
+- `.Codex/ToDo/ToDo.md` remains unavailable because local permissions reject creating `.Codex`; v0.2 task tracking is recorded under `.planning/phases/07-v02-bundled-sevenzip/`.
 - Normal signed build needs a valid Mac Development certificate for team D5ST8RM87C; unsigned local build passed with CODE_SIGNING_ALLOWED=NO.
 
 ## Deferred Items
 
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| Finder Integration | Right-click menu and Finder Sync | Deferred to v2 | Initialization |
-| Distribution | App Store release | Deferred to v2 | Initialization |
-| Engine | Embedded 7-Zip core | Deferred to v2 | Initialization |
-| Permissions | Security-scoped bookmarks | Deferred to v2 | Initialization |
+| Finder Integration | Right-click menu and Finder Sync | Deferred to v0.2 Phase 14 | Initialization |
+| Distribution | App Store release | Out of scope for v0.2 | Initialization |
+| Engine | Embedded 7-Zip C++ core | Out of scope for v0.2 | Initialization |
+| Permissions | Security-scoped bookmarks | Deferred to v0.2 Phase 13 | Initialization |
 
 ## Session Continuity
 
 Last session: 2026-05-05
-Stopped at: v1 Chinese MVP complete and runtime-verified on branch `codex/qizip-mvp`
+Stopped at: v0.2 Phase 7 complete on branch `codex/qizip-mvp`
 Resume file: None

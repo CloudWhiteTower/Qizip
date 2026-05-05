@@ -27,10 +27,10 @@ struct ContentView: View {
     @State private var archiveInfo: ArchiveInfo?
     @State private var extractionPresentation: OperationPresentation?
     @State private var compressionPresentation: OperationPresentation?
+    @State private var sevenZipStatus = SevenZipLocator().status()
 
     private let archiveService = ArchiveService()
     private let smartExtractionPlanner = SmartExtractionPlanner()
-    private let sevenZipStatus = ArchiveService().sevenZipStatus()
 
     var body: some View {
         Group {
@@ -49,6 +49,7 @@ struct ContentView: View {
                 )
             } else {
                 EmptyHomeView(
+                    sevenZipSourceText: sevenZipStatus.sourceDisplayName,
                     sevenZipStatusText: sevenZipStatus.message,
                     isSevenZipAvailable: sevenZipStatus.isAvailable,
                     isWorking: isLoading,
@@ -60,6 +61,9 @@ struct ContentView: View {
             }
         }
         .navigationTitle("Qizip")
+        .onAppear {
+            refreshSevenZipStatus()
+        }
         .toolbar {
             ToolbarItemGroup {
                 Button {
@@ -109,6 +113,10 @@ struct ContentView: View {
                 }
             )
         }
+    }
+
+    private func refreshSevenZipStatus() {
+        sevenZipStatus = archiveService.sevenZipStatus()
     }
 
     private func openArchive() {

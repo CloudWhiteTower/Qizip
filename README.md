@@ -2,7 +2,7 @@
 
 Qizip 是一个 macOS 原生 SwiftUI 压缩包管理器，目标是复刻 NanaZip 的核心使用体验，而不是移植 NanaZip 的 Windows 代码。
 
-v1 MVP 聚焦这些能力：
+v0.1 MVP 已完成这些能力：
 
 - 打开或拖入压缩包。
 - 以文件管理器风格浏览压缩包内容。
@@ -13,34 +13,54 @@ v1 MVP 聚焦这些能力：
 - 将用户选择的文件或文件夹压缩为 `.7z` 或 `.zip`。
 - 在界面中显示 7zz 的 stdout/stderr 日志。
 
-## 运行依赖
+## v0.2 目标
 
-Qizip v1 依赖本机 7-Zip 命令行工具 `7zz`。
+v0.2 的方向是从“能用的 7zz GUI wrapper”升级为更接近 macOS 系统体验的压缩包管理器。第一轮已经从 **Milestone 1：内置 7zz** 开始推进。
+
+v0.2 计划按以下顺序实现：
+
+1. 内置 7zz + SevenZipLocator。
+2. 文件关联 + AppLaunchRouter。
+3. Archive Browser 升级。
+4. Smart Extract 升级。
+5. QuickOperationPanel。
+6. JobQueueManager。
+7. Preferences + BookmarkManager。
+8. Finder Quick Actions。
+9. Legal / About / README。
+
+## 7zz 查找顺序
+
+QiZip v0.2 开始优先使用 app bundle 内置的官方 `7zz`，用户下载后不应再强依赖 Homebrew。
 
 查找顺序：
 
-1. `/opt/homebrew/bin/7zz`
-2. `/usr/local/bin/7zz`
+1. `Qizip.app/Contents/Resources/7zz`
+2. `/opt/homebrew/bin/7zz`
+3. `/usr/local/bin/7zz`
+4. `/usr/bin/7zz`
+5. 开发调试用 `QIZIP_SEVENZIP_PATH`
+6. Debug 构建下的 `.build/tools/7zip/7zz`
 
-如果两个路径都不存在，App 会显示：
+如果所有路径都不可用，App 会显示：
 
 ```text
-未找到 7zz。请使用 brew install sevenzip 安装。
+7zz was not found. Please install it with: brew install sevenzip, or bundle 7zz inside QiZip.
 ```
 
-推荐安装方式：
+如果 bundle 内的 `7zz` 存在但不可执行，App 会显示“exists but is not executable”诊断。开发时可执行：
 
 ```bash
-brew install sevenzip
+chmod +x Qizip/Vendor/7zz
 ```
 
-本地开发时，也可以指定项目内下载的 `7zz`：
+本地开发时，也可以指定外部 `7zz`：
 
 ```bash
 export QIZIP_SEVENZIP_PATH=/Users/cloud/code/CodeRepository/xcode_programmes/Qizip/Qizip/.build/tools/7zip/7zz
 ```
 
-Debug 构建还会尝试读取仓库根目录下的 `.build/tools/7zip/7zz`，便于本地命令行测试。
+UI 会显示当前来源：`Bundled 7zz`、`Homebrew 7zz`、`System 7zz` 或 `Not Found`。
 
 ## 构建
 
@@ -70,15 +90,28 @@ swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qiz
 
 如果仓库根目录存在 `test2zip/`，该 harness 会优先压缩并解压这个文件夹；否则会在 `.build/` 下生成等价测试夹。
 
-## v1 不做的范围
+SevenZipLocator 的 bundle-first 行为可以用 harness 验证：
 
-- Finder 右键菜单。
-- Finder Sync。
+```bash
+swiftc -module-cache-path .build/ModuleCache Qizip/Services/SevenZipLocator.swift Tests/SevenZipLocatorHarness.swift -o .build/sevenzip-locator-harness-bin
+.build/sevenzip-locator-harness-bin
+```
+
+## v0.2 暂不做的范围
+
 - App Store 发布。
 - 内嵌 7-Zip core。
 - Full Disk Access。
-- 持久化 security-scoped bookmarks。
+- 重写 7-Zip 压缩算法。
+- 主动扫描 Downloads、Desktop、Documents。
+- 复制 NanaZip 的名称、图标和品牌资产。
 
-## v1 分发说明
+## 分发与权限说明
 
-v1 直接依赖本机 Homebrew `7zz`。为了允许 App 调用 `/opt/homebrew/bin/7zz` 或 `/usr/local/bin/7zz`，当前 Xcode target 关闭了 App Sandbox。v1 不走 App Store 分发；文件访问仍通过用户拖拽、`NSOpenPanel` 和 `NSSavePanel` 发起。
+当前 target 仍关闭 App Sandbox，适用于直接分发和本地验证。v0.2 Milestone 1 改为优先调用 app bundle 内的 `7zz`，但文件访问仍通过用户拖拽、`NSOpenPanel` 和 `NSSavePanel` 发起。后续 v0.2 会单独加入 Preferences、BookmarkManager 和 Finder Quick Actions。
+
+## 第三方说明
+
+QiZip 使用 7-Zip / `7zz` 执行压缩包操作。许可证文件位于 `Qizip/Legal/7-Zip-LICENSE.txt`，第三方说明位于 `Qizip/Legal/ThirdPartyNotices.md`。
+
+QiZip is inspired by NanaZip and powered by 7-Zip. QiZip 不是 NanaZip for macOS，也不是 NanaZip 官方 Mac 版本。

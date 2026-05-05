@@ -4,6 +4,8 @@
 
 Qizip v1 builds from the existing SwiftUI skeleton into a usable macOS archive manager in narrow, runnable slices. The roadmap starts with a walking skeleton that detects `7zz`, opens archives, parses listings, and displays contents, then layers extraction, Smart Extract, compression, UX hardening, and release/testing readiness.
 
+Qizip v0.2 upgrades the completed MVP from a usable `7zz` GUI wrapper into a more macOS-native archive manager. The v0.2 sequence starts with bundling the official `7zz` executable, then proceeds through file association, launch routing, Archive Browser upgrades, Smart Extract refinement, quick operation panels, job queue, preferences/bookmarks, Finder Quick Actions, and legal/about documentation.
+
 ## Phases
 
 **Phase Numbering:**
@@ -18,6 +20,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Compression Flow** - Compress selected files/folders into `.7z` or `.zip`.
 - [x] **Phase 5: UX And Error Hardening** - Polish native UX, error handling, path edge cases, and dark mode.
 - [x] **Phase 6: Test And Release Readiness** - Add focused tests and prepare a direct macOS MVP build.
+- [x] **Phase 7: v0.2 Bundled SevenZip** - Bundle official `7zz`, make locator bundle-first, and show source diagnostics.
+- [ ] **Phase 8: v0.2 File Association And Launch Routing** - Open archive documents into Archive Browser without auto-extracting.
+- [ ] **Phase 9: v0.2 Archive Browser Upgrade** - Add search, sidebar, inspector, richer table columns, and status bar.
+- [ ] **Phase 10: v0.2 Smart Extract Upgrade** - Produce richer extract plans, ignore system trash entries, and expose plan reasoning.
+- [ ] **Phase 11: v0.2 Quick Operation Panel** - Add compact extract/compress operation panels for routed inputs.
+- [ ] **Phase 12: v0.2 JobQueueManager** - Route list/extract/smartExtract/compress/test through a unified queue.
+- [ ] **Phase 13: v0.2 Preferences And Bookmarks** - Add settings and security-scoped bookmark persistence.
+- [ ] **Phase 14: v0.2 Finder Quick Actions** - Add first Finder right-click actions through a thin router.
+- [ ] **Phase 15: v0.2 Legal And About** - Add app-visible 7-Zip notices and final README/manual acceptance updates.
 
 ## Phase Details
 
@@ -125,10 +136,65 @@ Plans:
 - [x] 06-02: Add manual acceptance documentation and release-readiness cleanup.
 - [x] 06-03: Localize user-facing copy and docs for Chinese v1.
 
+### Phase 7: v0.2 Bundled SevenZip
+**Goal**: Qizip no longer requires Homebrew sevenzip for the default path; the app bundle contains official `7zz`, `SevenZipLocator` prefers it, and the UI shows which source is active.
+**Depends on**: Phase 6
+**Requirements**: [V02-7Z-01, V02-7Z-02, V02-7Z-03, V02-7Z-04, V02-LEGAL-01]
+**Success Criteria** (what must be TRUE):
+  1. `Qizip.app/Contents/Resources/7zz` exists in the macOS build product and is executable.
+  2. Locator search order is bundle, `/opt/homebrew/bin/7zz`, `/usr/local/bin/7zz`, `/usr/bin/7zz`, then developer/debug fallbacks.
+  3. Home view shows source as `Bundled 7zz`, `Homebrew 7zz`, `System 7zz`, or `Not Found`.
+  4. Missing or non-executable `7zz` produces clear UI-visible diagnostics without crashing.
+  5. Open/list/test/extract/compress still use the same locator and continue to support Chinese and space paths.
+**Plans**: 1 plan
+
+Plans:
+- [x] 07-01: Add bundled 7zz resource, locator source diagnostics, docs, and focused verification.
+
+### Phase 8: v0.2 File Association And Launch Routing
+**Goal**: Double-clicking supported archive files opens QiZip's Archive Browser by default and never auto-extracts unless the user changes settings later.
+**Depends on**: Phase 7
+**Plans**: 1 plan
+
+### Phase 9: v0.2 Archive Browser Upgrade
+**Goal**: Make the browser feel closer to a modern macOS file manager with search, sidebar, inspector, richer table metadata, and a status bar.
+**Depends on**: Phase 8
+**Plans**: 1 plan
+
+### Phase 10: v0.2 Smart Extract Upgrade
+**Goal**: Upgrade Smart Extract into a reasoned planner that ignores system trash entries and returns a detailed `ExtractPlan`.
+**Depends on**: Phase 9
+**Plans**: 1 plan
+
+### Phase 11: v0.2 Quick Operation Panel
+**Goal**: Add compact macOS operation panels for archive and regular file inputs before Finder Quick Actions are wired.
+**Depends on**: Phase 10
+**Plans**: 1 plan
+
+### Phase 12: v0.2 JobQueueManager
+**Goal**: Centralize list, extract, smart extract, compress, and test operations in a queue with per-job logs and statuses.
+**Depends on**: Phase 11
+**Plans**: 1 plan
+
+### Phase 13: v0.2 Preferences And Bookmarks
+**Goal**: Add settings and security-scoped bookmarks for default locations without requesting Full Disk Access.
+**Depends on**: Phase 12
+**Plans**: 1 plan
+
+### Phase 14: v0.2 Finder Quick Actions
+**Goal**: Add first Finder Quick Actions as thin entry points that hand selected URLs to the main app.
+**Depends on**: Phase 13
+**Plans**: 1 plan
+
+### Phase 15: v0.2 Legal And About
+**Goal**: Finish app-visible third-party notices and update README/manual acceptance for the v0.2 release.
+**Depends on**: Phase 14
+**Plans**: 1 plan
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6, then v0.2 continues with 7 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -138,3 +204,12 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 4. Compression Flow | 2/2 | Complete | 2026-05-05 |
 | 5. UX And Error Hardening | 2/2 | Complete | 2026-05-05 |
 | 6. Test And Release Readiness | 3/3 | Complete | 2026-05-05 |
+| 7. v0.2 Bundled SevenZip | 1/1 | Complete | 2026-05-05 |
+| 8. v0.2 File Association And Launch Routing | 0/1 | Next | — |
+| 9. v0.2 Archive Browser Upgrade | 0/1 | Planned | — |
+| 10. v0.2 Smart Extract Upgrade | 0/1 | Planned | — |
+| 11. v0.2 Quick Operation Panel | 0/1 | Planned | — |
+| 12. v0.2 JobQueueManager | 0/1 | Planned | — |
+| 13. v0.2 Preferences And Bookmarks | 0/1 | Planned | — |
+| 14. v0.2 Finder Quick Actions | 0/1 | Planned | — |
+| 15. v0.2 Legal And About | 0/1 | Planned | — |

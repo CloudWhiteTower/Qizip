@@ -1,13 +1,13 @@
 import Foundation
 
 enum ArchiveServiceError: LocalizedError, Equatable {
-    case missingSevenZip
+    case missingSevenZip(String = SevenZipLocator.missingMessage)
     case processFailed(exitCode: Int32, detail: String)
 
     var errorDescription: String? {
         switch self {
-        case .missingSevenZip:
-            return SevenZipLocator.missingMessage
+        case .missingSevenZip(let message):
+            return message
         case .processFailed(let exitCode, let detail):
             let suffix = detail.isEmpty ? "" : "\n\(detail)"
             return "7zz 退出码为 \(exitCode)。\(suffix)"
@@ -59,8 +59,9 @@ struct ArchiveService {
     }
 
     func listArchive(url archiveURL: URL) async throws -> ArchiveListResult {
-        guard let executableURL = locator.locate() else {
-            throw ArchiveServiceError.missingSevenZip
+        let sevenZipStatus = locator.status()
+        guard let executableURL = sevenZipStatus.executableURL else {
+            throw ArchiveServiceError.missingSevenZip(sevenZipStatus.message)
         }
 
         let didStartSecurityScope = archiveURL.startAccessingSecurityScopedResource()
@@ -105,8 +106,9 @@ struct ArchiveService {
     }
 
     func compress(options: CompressionOptions) async throws -> ArchiveOperationResult {
-        guard let executableURL = locator.locate() else {
-            throw ArchiveServiceError.missingSevenZip
+        let sevenZipStatus = locator.status()
+        guard let executableURL = sevenZipStatus.executableURL else {
+            throw ArchiveServiceError.missingSevenZip(sevenZipStatus.message)
         }
 
         let scopedURLs = options.inputURLs + [options.outputURL.deletingLastPathComponent()]
@@ -141,8 +143,9 @@ struct ArchiveService {
         additionalScopedURLs: [URL],
         arguments: [String]
     ) async throws -> ArchiveOperationResult {
-        guard let executableURL = locator.locate() else {
-            throw ArchiveServiceError.missingSevenZip
+        let sevenZipStatus = locator.status()
+        guard let executableURL = sevenZipStatus.executableURL else {
+            throw ArchiveServiceError.missingSevenZip(sevenZipStatus.message)
         }
 
         let scopedURLs = [archiveURL] + additionalScopedURLs
