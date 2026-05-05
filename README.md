@@ -61,6 +61,15 @@ swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qiz
 .build/parser-planner-harness
 ```
 
+完整 v1 压缩/列表/测试/智能解压规划/解压流程可以用 harness 验证：
+
+```bash
+swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qizip/Models/CompressionOptions.swift Qizip/Services/ArchiveListParser.swift Qizip/Services/ArchiveService.swift Qizip/Services/SevenZipLocator.swift Qizip/Services/SevenZipRunner.swift Qizip/Services/SmartExtractionPlanner.swift Tests/V1ArchiveWorkflowHarness.swift -o .build/v1-archive-workflow-harness
+.build/v1-archive-workflow-harness
+```
+
+如果仓库根目录存在 `test2zip/`，该 harness 会优先压缩并解压这个文件夹；否则会在 `.build/` 下生成等价测试夹。
+
 ## v1 不做的范围
 
 - Finder 右键菜单。
@@ -69,3 +78,7 @@ swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qiz
 - 内嵌 7-Zip core。
 - Full Disk Access。
 - 持久化 security-scoped bookmarks。
+
+## v1 分发说明
+
+v1 直接依赖本机 Homebrew `7zz`。为了允许 App 调用 `/opt/homebrew/bin/7zz` 或 `/usr/local/bin/7zz`，当前 Xcode target 关闭了 App Sandbox。v1 不走 App Store 分发；文件访问仍通过用户拖拽、`NSOpenPanel` 和 `NSSavePanel` 发起。

@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-04)
 
 **Core value:** Qizip must make archive open, inspect, extract, and compress workflows feel reliable and native on macOS while preserving 7-Zip's format capability.
-**Current focus:** v1 中文版完成，等待 PR 合并/发布确认
+**Current focus:** v1 中文版完成，`test2zip` 运行时压缩/解压验证通过
 
 ## Current Position
 
 Phase: 6 of 6 (Test And Release Readiness)
 Plan: 2 of 2 in current phase
 Status: Complete
-Last activity: 2026-05-05 — Completed Chinese UI/documentation pass for v1, with build and harness verification
+Last activity: 2026-05-05 — Fixed Homebrew `7zz` runtime discovery/execution issue by disabling App Sandbox for direct-distribution v1; verified `test2zip` compression/extraction workflow
 
 Progress: [██████████] 100%
 
@@ -75,5 +75,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-05
-Stopped at: v1 Chinese MVP complete on branch `codex/qizip-mvp`
+Stopped at: v1 Chinese MVP complete and runtime-verified on branch `codex/qizip-mvp`
 Resume file: None

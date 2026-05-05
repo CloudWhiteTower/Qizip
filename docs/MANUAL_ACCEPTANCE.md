@@ -42,5 +42,6 @@ export QIZIP_SEVENZIP_PATH=/Users/cloud/code/CodeRepository/xcode_programmes/Qiz
 
 - Xcode macOS 构建通过。
 - Parser/Smart Extract harness 通过。
+- v1 archive workflow harness 使用 `test2zip` 通过压缩、列表、测试、智能解压规划和解压验证。
 - 项目内 7zz 26.01 arm64 可执行。
 - 命令级 `a`、`l -slt`、`t`、`x` 已用中文和空格路径验证通过。
