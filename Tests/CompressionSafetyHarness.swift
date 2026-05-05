@@ -48,6 +48,12 @@ struct CompressionSafetyHarness {
         var isDirectory: ObjCBool = false
         if fileManager.fileExists(atPath: userTest2ZipURL.path, isDirectory: &isDirectory), isDirectory.boolValue {
             try await assertNestedOutputIsRejected(service: service, sourceURL: userTest2ZipURL, outputName: "压缩包.zip")
+            try await assertNestedOutputCanProceedViaTemporaryArchive(
+                service: service,
+                sourceURL: userTest2ZipURL,
+                outputName: "压缩包.zip",
+                fileManager: fileManager
+            )
         }
 
         let staleSourceURL = workURL.appendingPathComponent("stale", isDirectory: true)
@@ -62,8 +68,14 @@ struct CompressionSafetyHarness {
         _ = try await service.compress(
             options: CompressionOptions(inputURLs: [staleSourceURL], outputURL: archiveURL, format: .zip)
         )
+        try await assertExistingOutputRequiresReplacementChoice(
+            service: service,
+            sourceURL: sourceURL,
+            archiveURL: archiveURL
+        )
         _ = try await service.compress(
-            options: CompressionOptions(inputURLs: [sourceURL], outputURL: archiveURL, format: .zip)
+            options: CompressionOptions(inputURLs: [sourceURL], outputURL: archiveURL, format: .zip),
+            replacingExistingOutput: true
         )
 
         let listResult = try await service.listArchive(url: archiveURL)
@@ -103,6 +115,42 @@ struct CompressionSafetyHarness {
             }
         }
     }
+
+    private static func assertNestedOutputCanProceedViaTemporaryArchive(
+        service: ArchiveService,
+        sourceURL: URL,
+        outputName: String,
+        fileManager: FileManager
+    ) async throws {
+        let nestedOutputURL = sourceURL.appendingPathComponent(outputName)
+        _ = try await service.compress(
+            options: CompressionOptions(inputURLs: [sourceURL], outputURL: nestedOutputURL, format: .zip),
+            replacingExistingOutput: true,
+            allowingOutputInsideInput: true
+        )
+
+        guard fileManager.fileExists(atPath: nestedOutputURL.path) else {
+            throw HarnessError.nestedOutputWasNotCreated
+        }
+    }
+
+    private static func assertExistingOutputRequiresReplacementChoice(
+        service: ArchiveService,
+        sourceURL: URL,
+        archiveURL: URL
+    ) async throws {
+        do {
+            _ = try await service.compress(
+                options: CompressionOptions(inputURLs: [sourceURL], outputURL: archiveURL, format: .zip),
+                replacingExistingOutput: false
+            )
+            throw HarnessError.existingOutputWasAcceptedWithoutReplacement
+        } catch ArchiveServiceError.unsafeCompressionOutput(let message) {
+            guard message.contains("已存在") else {
+                throw HarnessError.unexpectedErrorMessage(message)
+            }
+        }
+    }
 }
 
 enum HarnessError: Error, CustomStringConvertible {
@@ -113,6 +161,8 @@ enum HarnessError: Error, CustomStringConvertible {
     case unexpectedArchiveEntries([String])
     case staleEntryWasNotRemoved
     case extractDidNotOverwrite(String)
+    case nestedOutputWasNotCreated
+    case existingOutputWasAcceptedWithoutReplacement
 
     var description: String {
         switch self {
@@ -130,6 +180,10 @@ enum HarnessError: Error, CustomStringConvertible {
             return "stale entry was not removed when replacing existing output archive"
         case .extractDidNotOverwrite(let contents):
             return "extract did not overwrite existing file, contents: \(contents)"
+        case .nestedOutputWasNotCreated:
+            return "nested output was not created after user-approved temporary archive flow"
+        case .existingOutputWasAcceptedWithoutReplacement:
+            return "existing output was accepted without replacement choice"
         }
     }
 }

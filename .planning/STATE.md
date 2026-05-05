@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-05-04)
 Phase: 7 of 15 (v0.2 Bundled SevenZip)
 Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-05-05 — Stabilized v0.2 compression/extraction by preventing 7zz overwrite prompts, rejecting nested output archives, defaulting compression to zip, and adding safety regression tests
+Last activity: 2026-05-05 — Stabilized v0.2 compression/extraction with user confirmation dialogs for replacement, nested output, and extraction overwrite cases; default compression remains zip
 
 Progress: [███████░░░] v0.1 complete; v0.2 Phase 7 complete, Phase 8 next
 

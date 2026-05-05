@@ -14,8 +14,9 @@ v0.1 MVP 已完成这些能力：
 - 在界面中显示 7zz 的 stdout/stderr 日志。
 - 默认压缩格式为 `.zip`。
 - 默认压缩包名来自第一个选中项。
-- 避免把输出压缩包保存到正在压缩的源文件夹内部。
-- 解压遇到同名文件时使用非交互覆盖，避免 7zz 等待确认导致界面看似卡住。
+- 遇到已有同名输出压缩包时弹窗让用户选择替换、另选位置或取消。
+- 遇到输出压缩包保存在源文件夹内部时弹窗让用户选择继续、另选位置或取消；继续时会先在临时目录创建压缩包，再移动到目标位置。
+- 解压遇到同名文件时先弹窗让用户确认覆盖，避免 7zz 等待确认导致界面看似卡住。
 
 ## v0.2 目标
 
@@ -105,8 +106,8 @@ swiftc -module-cache-path .build/ModuleCache Qizip/Models/ArchiveEntry.swift Qiz
 
 - 默认格式为 `.zip`。
 - 默认压缩包名来自第一个输入文件或文件夹。
-- 拒绝将输出压缩包保存到正在压缩的源文件夹内部。
-- 已存在同名输出压缩包时替换旧文件，避免旧条目残留。
+- 默认拒绝将输出压缩包保存到正在压缩的源文件夹内部；用户确认继续时使用临时压缩包再移动到目标路径。
+- 已存在同名输出压缩包时，必须由用户选择替换后才会替换旧文件，避免旧条目残留。
 - 重复解压到已有文件位置时不会等待交互确认。
 - 中文和空格路径正常。
 
@@ -129,6 +130,8 @@ swiftc -module-cache-path .build/ModuleCache Qizip/Services/SevenZipLocator.swif
 ## 分发与权限说明
 
 当前 target 仍关闭 App Sandbox，适用于直接分发和本地验证。v0.2 Milestone 1 改为优先调用 app bundle 内的 `7zz`，但文件访问仍通过用户拖拽、`NSOpenPanel` 和 `NSSavePanel` 发起。后续 v0.2 会单独加入 Preferences、BookmarkManager 和 Finder Quick Actions。
+
+本地 DMG 可以用 Release 构建产物打包，并在没有 Apple Developer ID 证书时使用 ad-hoc 签名做完整性验证。ad-hoc 签名不是 Apple notarization，不能保证其他 Mac 完全不出现 Gatekeeper 提示。正式公开分发需要 `Developer ID Application` 证书和 Apple notarization。
 
 ## 第三方说明
 

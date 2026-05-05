@@ -22,10 +22,11 @@ updated: 2026-05-05
 
 ## Fix
 
-- Extraction now uses `-y -aoa`.
-- Compression now uses `-y`.
-- Existing output archive files are removed before creating the replacement archive.
-- Compression rejects output paths inside selected source directories or equal to selected source files.
+- Extraction asks the user before overwriting existing destination items, then uses `-y -aoa` after confirmation.
+- Compression asks the user before replacing existing output archives.
+- Compression asks the user before allowing an output path inside the selected source directory.
+- User-approved nested output compression writes to a temporary archive first, then moves it to the requested destination.
+- Compression still rejects output paths equal to selected source files or pointing at folders.
 - Default compression format is `.zip`.
 - Default archive base name is derived from the first selected input.
 

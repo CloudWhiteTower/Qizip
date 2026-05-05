@@ -7,12 +7,19 @@
 
 import SwiftUI
 import UniformTypeIdentifiers
+import AppKit
 
 private struct OperationPresentation: Identifiable {
     let id = UUID()
     var title: String
     var message: String
     var url: URL?
+}
+
+private enum CompressionChoice {
+    case proceed(replacingExistingOutput: Bool, allowingOutputInsideInput: Bool)
+    case chooseAnotherLocation
+    case cancel
 }
 
 struct ContentView: View {
@@ -239,6 +246,11 @@ struct ContentView: View {
         destinationURL: URL,
         successMessage: String
     ) {
+        guard confirmExtractionOverwriteIfNeeded(destinationURL: destinationURL) else {
+            appendLog("\(kind.rawValue)已取消\n用户取消覆盖目标位置的同名项目。")
+            return
+        }
+
         errorMessage = nil
         isLoading = true
         currentJob = ArchiveJob(kind: kind, title: "\(kind.rawValue) \(archiveURL.lastPathComponent)")
@@ -320,16 +332,39 @@ struct ContentView: View {
 
     private func startCompression(inputURLs: [URL]) {
         let defaultName = CompressionDefaults.archiveBaseName(for: inputURLs)
-        guard var outputURL = FileDialogs.chooseArchiveOutput(defaultName: defaultName, defaultFormat: CompressionDefaults.format) else {
+        var pendingOptions: CompressionOptions?
+        var compressionChoice = CompressionChoice.cancel
+
+        while pendingOptions == nil {
+            guard var outputURL = FileDialogs.chooseArchiveOutput(defaultName: defaultName, defaultFormat: CompressionDefaults.format) else {
+                return
+            }
+
+            var format = CompressionFormat.fromOutputURL(outputURL) ?? CompressionDefaults.format
+            if outputURL.pathExtension.isEmpty {
+                outputURL.appendPathExtension(format.rawValue)
+            } else {
+                format = CompressionFormat.fromOutputURL(outputURL) ?? format
+            }
+
+            let options = CompressionOptions(inputURLs: inputURLs, outputURL: outputURL, format: format)
+            compressionChoice = confirmCompressionIfNeeded(options: options)
+
+            switch compressionChoice {
+            case .proceed:
+                pendingOptions = options
+            case .chooseAnotherLocation:
+                continue
+            case .cancel:
+                appendLog("压缩已取消\n用户取消了压缩操作。")
+                return
+            }
+        }
+
+        guard let options = pendingOptions else {
             return
         }
 
-        let format = CompressionFormat.fromOutputURL(outputURL) ?? .sevenZip
-        if outputURL.pathExtension.isEmpty {
-            outputURL.appendPathExtension(format.rawValue)
-        }
-
-        let options = CompressionOptions(inputURLs: inputURLs, outputURL: outputURL, format: format)
         errorMessage = nil
         logText = ""
         isLoading = true
@@ -338,12 +373,22 @@ struct ContentView: View {
 
         Task {
             do {
-                let result = try await archiveService.compress(options: options)
+                let result: ArchiveOperationResult
+                switch compressionChoice {
+                case .proceed(let replacingExistingOutput, let allowingOutputInsideInput):
+                    result = try await archiveService.compress(
+                        options: options,
+                        replacingExistingOutput: replacingExistingOutput,
+                        allowingOutputInsideInput: allowingOutputInsideInput
+                    )
+                case .chooseAnotherLocation, .cancel:
+                    return
+                }
                 appendLog("压缩完成\n\(combinedLog(stdout: result.stdout, stderr: result.stderr))")
                 compressionPresentation = OperationPresentation(
                     title: "压缩完成",
                     message: "压缩包已成功创建。",
-                    url: outputURL
+                    url: options.outputURL
                 )
                 currentJob?.succeeded = true
             } catch {
@@ -361,6 +406,141 @@ struct ContentView: View {
             currentJob?.finishedAt = Date()
             isLoading = false
         }
+    }
+
+    private func confirmCompressionIfNeeded(options: CompressionOptions) -> CompressionChoice {
+        let issues = archiveService.compressionOutputIssues(for: options)
+        guard !issues.isEmpty else {
+            return .proceed(replacingExistingOutput: false, allowingOutputInsideInput: false)
+        }
+
+        if let blockingMessage = blockingCompressionMessage(from: issues) {
+            showInformationalAlert(title: "无法保存压缩包", message: blockingMessage)
+            return .chooseAnotherLocation
+        }
+
+        let outputExists = issues.contains { issue in
+            if case .outputExists = issue {
+                return true
+            }
+            return false
+        }
+        let outputInsideInput = issues.contains { issue in
+            if case .outputInsideInput = issue {
+                return true
+            }
+            return false
+        }
+
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "确认压缩包保存方式"
+        alert.informativeText = compressionConfirmationMessage(
+            outputURL: options.outputURL,
+            outputExists: outputExists,
+            outputInsideInput: outputInsideInput
+        )
+        alert.addButton(withTitle: outputExists ? "替换并继续" : "继续")
+        alert.addButton(withTitle: "选择其他位置")
+        alert.addButton(withTitle: "取消")
+
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            return .proceed(
+                replacingExistingOutput: outputExists,
+                allowingOutputInsideInput: outputInsideInput
+            )
+        case .alertSecondButtonReturn:
+            return .chooseAnotherLocation
+        default:
+            return .cancel
+        }
+    }
+
+    private func blockingCompressionMessage(from issues: [CompressionOutputIssue]) -> String? {
+        for issue in issues {
+            switch issue {
+            case .outputIsDirectory(let url):
+                return "输出位置是文件夹，无法保存为压缩包：\n\(url.path)"
+            case .outputMatchesInput(let url):
+                return "输出压缩包不能覆盖正在压缩的源文件：\n\(url.path)"
+            case .outputInsideInput, .outputExists:
+                continue
+            }
+        }
+
+        return nil
+    }
+
+    private func compressionConfirmationMessage(outputURL: URL, outputExists: Bool, outputInsideInput: Bool) -> String {
+        var lines: [String] = []
+
+        if outputExists {
+            lines.append("目标位置已经存在同名压缩包。继续会替换旧压缩包。")
+        }
+
+        if outputInsideInput {
+            lines.append("目标位置在正在压缩的源文件夹内部。继续时 QiZip 会先在临时目录创建压缩包，再移动到目标位置，避免把压缩包压进自身。")
+        }
+
+        lines.append("")
+        lines.append(outputURL.path)
+        return lines.joined(separator: "\n")
+    }
+
+    private func confirmExtractionOverwriteIfNeeded(destinationURL: URL) -> Bool {
+        let existingURLs = existingExtractionTargets(in: destinationURL)
+        guard !existingURLs.isEmpty else {
+            return true
+        }
+
+        let shownTargets = existingURLs.prefix(6).map(\.path).joined(separator: "\n")
+        let remainingCount = existingURLs.count - min(existingURLs.count, 6)
+        let suffix = remainingCount > 0 ? "\n另有 \(remainingCount) 个同名项目。" : ""
+
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "目标位置已有同名项目"
+        alert.informativeText = "继续解压会覆盖这些项目：\n\(shownTargets)\(suffix)"
+        alert.addButton(withTitle: "覆盖")
+        alert.addButton(withTitle: "取消")
+        return alert.runModal() == .alertFirstButtonReturn
+    }
+
+    private func existingExtractionTargets(in destinationURL: URL) -> [URL] {
+        let fileManager = FileManager.default
+        var seenPaths = Set<String>()
+        var existingURLs: [URL] = []
+
+        for entry in entries {
+            let normalizedPath = entry.path
+                .trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                .replacingOccurrences(of: "\\", with: "/")
+
+            guard !normalizedPath.isEmpty else {
+                continue
+            }
+
+            let targetURL = destinationURL.appendingPathComponent(normalizedPath)
+            let path = targetURL.standardizedFileURL.path
+            guard !seenPaths.contains(path), fileManager.fileExists(atPath: path) else {
+                continue
+            }
+
+            seenPaths.insert(path)
+            existingURLs.append(targetURL)
+        }
+
+        return existingURLs
+    }
+
+    private func showInformationalAlert(title: String, message: String) {
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = title
+        alert.informativeText = message
+        alert.addButton(withTitle: "选择其他位置")
+        alert.runModal()
     }
 
     private func archiveInfoSheet(_ info: ArchiveInfo) -> some View {
